@@ -83,7 +83,7 @@ class Stall:
         return "Hello, we are the " + self.name + ". This is the current menu " + str(self.inventory.keys()) + ". We charge $" + str(self.cost) + " per item. W have $" + str(self.earnings) + " in total." 
 
     def has_item(self, name, quantity):
-        if self.inventory[name] >= quantity:
+        if (name in self.inventory) and (self.inventory[name] >= quantity):
             return True
         else:                
             return False
@@ -113,6 +113,7 @@ class TestAllMethods(unittest.TestCase):
         self.s3 = Stall("The Streatery", inventory)
         self.c1 = Cashier("West")
         self.c2 = Cashier("East")
+        
         #the following codes show that the two cashiers have the same directory
         for c in [self.c1, self.c2]:
             for s in [self.s1,self.s2,self.s3]:
@@ -184,20 +185,43 @@ class TestAllMethods(unittest.TestCase):
         # Test to see if has_item returns True when a stall has enough items left
         # Please follow the instructions below to create three different kinds of test cases 
         # Test case 1: the stall does not have this food item: 
-        
+        self.assertFalse(self.s1.has_item('pizza',1))
         # Test case 2: the stall does not have enough food item: 
-        
+        self.assertFalse(self.s1.has_item('Burger',41))
         # Test case 3: the stall has the food item of the certain quantity: 
-        pass
+        self.assertTrue(self.s2.has_item('Taco', 5))
 
 	# Test validate order
     def test_validate_order(self):
 		# case 1: test if a customer doesn't have enough money in their wallet to order
+        item = self.s1.inventory['Taco']
+        wallet= self.f1.wallet
+        self.f1.validate_order(self.c1,self.s1,'Taco',50)
+        self.assertEqual(self.f1.wallet,wallet)
+        self.assertEqual(item,self.s1.inventory['Taco'])
+        #f1 only has 100 and each taco in s1 is 10 so 50 tacos would be 500 which is more than what f1 has in his wallet
+        #we checked to see if his wallet still contained 100 because the order should not have gone through and we also
+        #checked to see if the inventory was the same for taco before and after the call to validate order
 
 		# case 2: test if the stall doesn't have enough food left in stock
+        self.f2.validate_order(self.c2,self.s3,'Burger',50)
+        num = self.s1.inventory['Burger']
+        num1 = self.f2.wallet
+        self.assertTrue(50 > self.s3.inventory['Burger'])
+        self.assertEqual(self.f2.wallet.num1)
+        self.assertEqual(num,self.s3.inventory['Burger'])
+        #only 40 burgers in s3 so 50 burgers would be greater than 40 burgers so the ordere cannot be validated which means that the wallet should stay the
+        #same and also the number of inventory should stay the same
 
 		# case 3: check if the cashier can order item from that stall
-        pass
+        self.s4 = Stall("Stuff", {'Burger': 40})
+        num = self.s4.inventory['Burger']
+        num1 = self.f1.wallet
+        self.f1.validate_order(self.c2, self.s4, 'Burger', 20)
+        self.assertFalse(self.c2.has_stall(self.s4))
+        self.assertEqual(self.f1.wallet, num1)
+        self.assertEqual(num, self.s4.inventory['Burger'])
+
 
     # Test if a customer can add money to their wallet
     def test_reload_money(self):
